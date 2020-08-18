@@ -565,8 +565,7 @@ namespace NFe.Servicos
               detEvento.xCorrecao = correcao.RemoverAcentucaoSimples();
             }
 
-
-      var infEvento = new infEventoEnv
+            var infEvento = new infEventoEnv
             {
                 cOrgao = _cFgServico.cUF,
                 tpAmb = _cFgServico.tpAmb,
