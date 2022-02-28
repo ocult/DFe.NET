@@ -97,7 +97,9 @@ namespace NFe.Servicos
                 _certificado = CertificadoDigital.ObterCertificado(cFgServico.Certificado);
             else
                 _certificado = certificado;
-            _path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            string path = Assembly.GetExecutingAssembly().Location;
+            _path = string.IsNullOrEmpty(path) ? Directory.GetCurrentDirectory() : Path.GetDirectoryName(path);
 
             //Define a versão do protocolo de segurança
             ServicePointManager.SecurityProtocol = cFgServico.ProtocoloDeSeguranca;
@@ -630,8 +632,7 @@ namespace NFe.Servicos
             {
                 var infEvento = new infEventoEnv
                 {
-                    cOrgao = _cFgServico.cUF == Estado.RS ? _cFgServico.cUF : Estado.AN,
-                    //RS possui endereço próprio para manifestação do destinatário. Demais UFs usam o ambiente nacional
+                    cOrgao = Estado.AN,                    
                     tpAmb = _cFgServico.tpAmb,
                     chNFe = chaveNFe,
                     dhEvento = dhEvento ?? DateTime.Now,
