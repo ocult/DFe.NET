@@ -75,6 +75,11 @@ namespace NFe.Classes.Informacoes.Detalhe
         }
 
         /// <summary>
+        ///     I03a - Código de barras diferente do padrão GTIN
+        /// </summary>
+        public string cBarra { get; set; }
+
+        /// <summary>
         ///     I04 - Descrição do produto ou serviço
         /// </summary>
         public string xProd { get; set; }
@@ -118,10 +123,17 @@ namespace NFe.Classes.Informacoes.Detalhe
 
         /// <summary>
         /// Versão 4.00
-        /// Código de Benefício fiscal utilizado pela UF, aplicado ao item. Obs: Deve ser utilizado o mesmo código adotado na EFD e outras
+        /// I05f Código de Benefício fiscal utilizado pela UF, aplicado ao item. Obs: Deve ser utilizado o mesmo código adotado na EFD e outras
         /// declarações, nas UF que o exigem.
         /// </summary>
         public string cBenef { get; set; }
+
+        /// <summary>
+        /// I05G - Grupo de Informações sobre o Crédito Presumido
+        /// Versão 4.00 - NT 2019.001
+        /// </summary>
+        [XmlElement("gCred")]
+        public List<gCred> gCred { get; set; }
 
         /// <summary>
         ///     I06 - Código EX TIPI (3 posições)
@@ -173,6 +185,11 @@ namespace NFe.Classes.Informacoes.Detalhe
             get { return _cEanTrib ?? string.Empty; } //Sempre serializar o campo cEANTrib, mesmo que não tenha valor 
             set { _cEanTrib = value ?? string.Empty; }
         }
+
+        /// <summary>
+        ///     I12a - Código de Barras da unidade tributável que seja diferente do padrão GTIN
+        /// </summary>
+        public string cBarraTrib { get; set; }
 
         /// <summary>
         ///     I13 - Unidade Tributável
@@ -330,6 +347,6 @@ namespace NFe.Classes.Informacoes.Detalhe
         {
             return vOutro.HasValue && vOutro > 0;
         }
-
+        
     }
 }

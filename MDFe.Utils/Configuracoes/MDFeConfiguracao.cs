@@ -32,92 +32,178 @@
 /********************************************************************************/
 
 using System.Security.Cryptography.X509Certificates;
-using DFe.Classes.Entidades;
-using DFe.Classes.Flags;
 using DFe.Utils;
 using DFe.Utils.Assinatura;
 using System;
-using VersaoServico = MDFe.Utils.Flags.VersaoServico;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using NFe.Utils.Annotations;
 
 namespace MDFe.Utils.Configuracoes
 {
-    public class MDFeConfiguracao : IDisposable 
+    public class MDFeConfiguracao : IDisposable, INotifyPropertyChanged
     {
-        private static MDFeVersaoWebService _versaoWebService;
+        private static volatile MDFeConfiguracao _instancia;
+        private static readonly object SyncRoot = new object();
+
+        private string _caminhoSchemas;
+        private bool _deveSalvarXmls;
+        private MDFeVersaoWebService _versaoWebService;
+        private X509Certificate2 _certificado;
 
         public MDFeConfiguracao()
         {
             VersaoWebService = new MDFeVersaoWebService();
+            ConfiguracaoCertificado = new ConfiguracaoCertificado();
         }
 
-        public static ConfiguracaoCertificado ConfiguracaoCertificado { get; set; }
+        static MDFeConfiguracao()
+        {
+        }
 
-        public static bool IsSalvarXml { get; set; }
-        public static string CaminhoSchemas { get; set; }
-        public static string CaminhoSalvarXml { get; set; }
-        public static bool IsAdicionaQrCode { get; set; }
+        public ConfiguracaoCertificado ConfiguracaoCertificado { get; set; }
 
-        public static MDFeVersaoWebService VersaoWebService
+        /// <summary>
+        ///     Informar se a biblioteca deve salvar o xml de envio e de retorno
+        /// </summary>
+        public bool IsSalvarXml
+        {
+            get { return _deveSalvarXmls; }
+            set
+            {
+                if (!value)
+                    CaminhoSalvarXml = "";
+                _deveSalvarXmls = value;
+            }
+        }
+
+        /// <summary>
+        ///     Diretório onde estão armazenados os schemas para validação
+        /// </summary>
+        public string CaminhoSchemas
+        {
+            get { return _caminhoSchemas; }
+            set
+            {
+                if (!string.IsNullOrEmpty(value) && !Directory.Exists(value))
+                    throw new Exception("Diretório " + value + " não encontrado!");
+                _caminhoSchemas = value;
+            }
+        }
+
+        /// <summary>
+        ///     Diretório onde os xmls de envio/retorno devem ser salvos
+        /// </summary>
+        public string CaminhoSalvarXml { get; set; }
+
+        public bool IsAdicionaQrCode { get; set; }
+
+        public MDFeVersaoWebService VersaoWebService
         {
             get { return GetMdfeVersaoWebService(); }
             set { _versaoWebService = value; }
         }
 
-        private static MDFeVersaoWebService GetMdfeVersaoWebService()
+        private MDFeVersaoWebService GetMdfeVersaoWebService()
         {
-            if(_versaoWebService == null)
+            if (_versaoWebService == null)
                 _versaoWebService = new MDFeVersaoWebService();
 
             return _versaoWebService;
         }
-
-        private static X509Certificate2 _certificado = null;
-        public static X509Certificate2 X509Certificate2
+        
+        public X509Certificate2 X509Certificate2
         {
             get
             {
-                if (_certificado != null)
-                    if (!ConfiguracaoCertificado.ManterDadosEmCache)
-                        _certificado.Reset();
+                if (_certificado != null && !DeveManterCertificadoEmCache())
+                    _certificado.Reset();
+
                 _certificado = ObterCertificado();
                 return _certificado;
             }
         }
 
-        public static bool NaoSalvarXml()
+        public bool NaoSalvarXml()
         {
             return !IsSalvarXml;
         }
 
-        private static X509Certificate2 ObterCertificado()
+        private X509Certificate2 ObterCertificado()
         {
             return CertificadoDigital.ObterCertificado(ConfiguracaoCertificado);
         }
 
+        /// <summary>
+        ///     Instância do Singleton de MDFeConfiguracao
+        /// </summary>
+        public static MDFeConfiguracao Instancia
+        {
+            get
+            {
+                if (_instancia != null) return _instancia;
+                lock (SyncRoot)
+                {
+                    if (_instancia != null) return _instancia;
+                    _instancia = new MDFeConfiguracao();
+                }
+
+                return _instancia;
+            }
+            set
+            {
+                lock (SyncRoot)
+                {
+                    if (value != null)
+                        _instancia = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Limpa a instancia atual caso exista
+        /// </summary>
+        public static void LimparInstancia()
+        {
+            _instancia = null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public void Dispose()
         {
-            if (!ConfiguracaoCertificado.ManterDadosEmCache && _certificado != null)
-            {
-                _certificado.Reset();
-                _certificado = null;
-            }
+            LimparCertificado();
         }
 
         ~MDFeConfiguracao()
         {
-            if (!ConfiguracaoCertificado.ManterDadosEmCache && _certificado != null)
-            {
-                _certificado.Reset();
-                _certificado = null;
-            }
+            LimparCertificado();
         }
-    }
 
-    public class MDFeVersaoWebService
-    {
-        public int TimeOut { get; set; }
-        public Estado UfEmitente { get; set; }
-        public TipoAmbiente TipoAmbiente { get; set; }
-        public VersaoServico VersaoLayout { get; set; }
+        private void LimparCertificado()
+        {
+            if (DeveManterCertificadoEmCache())
+                return;
+
+            _certificado.Reset();
+            _certificado = null;
+        }
+
+        private bool DeveManterCertificadoEmCache()
+        {
+            var deveManterCertificadoEmCache = _certificado == null ||
+                                               ConfiguracaoCertificado == null ||
+                                               ConfiguracaoCertificado.ManterDadosEmCache;
+
+            return deveManterCertificadoEmCache;
+        }
     }
 }

@@ -58,9 +58,14 @@ namespace NFe.Utils
         private TipoEmissao _tpEmis;
         private ModeloDocumento _modeloDocumento;
         private bool _defineVersaoServicosAutomaticamente = true;
+        private bool _unZip = true;
         private VersaoServico _versaoRecepcaoEventoCceCancelamento;
+        private VersaoServico _versaoRecepcaoEventoInsucessoEntrega;
+        private VersaoServico _versaoRecepcaoEventoComprovanteEntrega;
+        private VersaoServico _versaoRecepcaoEventoConciliacaoFinanceira;
         private VersaoServico _versaoRecepcaoEventoEpec;
         private VersaoServico _versaoRecepcaoEventoManifestacaoDestinatario;
+        private VersaoServico _versaoRecepcaoEventoAtorInteressado;
         private VersaoServico _versaoNfeRecepcao;
         private VersaoServico _versaoNfeRetRecepcao;
         private VersaoServico _versaoNfeConsultaCadastro;
@@ -196,6 +201,24 @@ namespace NFe.Utils
                 AtualizaVersoes();
             }
         }
+        
+        /// <summary>
+        /// Valor True, será descompactado os arquivos,
+        /// Valor False, os valor não será descompactado e a classes não serão preenchidas
+        /// </summary>
+        public bool UnZip
+        {
+            get
+            {
+                return _unZip;
+            }
+            set
+            {
+                _unZip = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         /// <summary>
         /// Atualiza as versões dos serviços
@@ -215,8 +238,12 @@ namespace NFe.Utils
             if (enderecosMaisecentes.Any())
             {
                 VersaoRecepcaoEventoCceCancelamento = obterVersao(ServicoNFe.RecepcaoEventoCancelmento);
+                VersaoRecepcaoEventoInsucessoEntrega = obterVersao(ServicoNFe.RecepcaoEventoInsucessoEntregaNFe);
+                VersaoRecepcaoEventoComprovanteEntrega = obterVersao(ServicoNFe.RecepcaoEventoComprovanteEntregaNFe);
+                VersaoRecepcaoEventoConciliacaoFinanceira = obterVersao(ServicoNFe.RecepcaoEventoConciliacaoFinanceiraNFe);
                 VersaoRecepcaoEventoEpec = obterVersao(ServicoNFe.RecepcaoEventoEpec);
                 VersaoRecepcaoEventoManifestacaoDestinatario = obterVersao(ServicoNFe.RecepcaoEventoManifestacaoDestinatario);
+                VersaoRecepcaoEventoAtorInteressado = obterVersao(ServicoNFe.RecepcaoEventoAtorInteressado);
                 VersaoNfeRecepcao = obterVersao(ServicoNFe.NfeRecepcao);
                 VersaoNfeRetRecepcao = obterVersao(ServicoNFe.NfeRetRecepcao);
                 VersaoNfeConsultaCadastro = obterVersao(ServicoNFe.NfeConsultaCadastro);
@@ -263,6 +290,49 @@ namespace NFe.Utils
             }
         }
 
+
+        /// <summary>
+        ///     Versão do serviço RecepcaoEvento para Carta de Correção e Cancelamento
+        /// </summary>
+        public VersaoServico VersaoRecepcaoEventoInsucessoEntrega
+        {
+            get { return _versaoRecepcaoEventoInsucessoEntrega; }
+            set
+            {
+                if (value == _versaoRecepcaoEventoInsucessoEntrega) return;
+                _versaoRecepcaoEventoInsucessoEntrega = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        ///     Versão do serviço RecepcaoEvento para Comprovante de Entrega da NFe
+        /// </summary>
+        public VersaoServico VersaoRecepcaoEventoComprovanteEntrega
+        {
+            get { return _versaoRecepcaoEventoComprovanteEntrega; }
+            set
+            {
+                if (value == _versaoRecepcaoEventoComprovanteEntrega) return;
+                _versaoRecepcaoEventoComprovanteEntrega = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        ///     Versão do serviço RecepcaoEvento para Conciliação Financeira da NFe
+        /// </summary>
+        public VersaoServico VersaoRecepcaoEventoConciliacaoFinanceira
+        {
+            get { return _versaoRecepcaoEventoConciliacaoFinanceira; }
+            set
+            {
+                if (value == _versaoRecepcaoEventoConciliacaoFinanceira) return;
+                _versaoRecepcaoEventoConciliacaoFinanceira = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>
         ///     Versão do serviço RecepcaoEvento para Manifestação do destinatário
         /// </summary>
@@ -273,6 +343,20 @@ namespace NFe.Utils
             {
                 if (value == _versaoRecepcaoEventoManifestacaoDestinatario) return;
                 _versaoRecepcaoEventoManifestacaoDestinatario = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        ///     Versão do serviço RecepcaoEvento para Ator interessado
+        /// </summary>
+        public VersaoServico VersaoRecepcaoEventoAtorInteressado
+        {
+            get { return _versaoRecepcaoEventoAtorInteressado; }
+            set
+            {
+                if (value == _versaoRecepcaoEventoAtorInteressado) return;
+                _versaoRecepcaoEventoAtorInteressado = value;
                 OnPropertyChanged();
             }
         }

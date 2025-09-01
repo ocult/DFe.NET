@@ -35,7 +35,7 @@ using System.Threading.Tasks;
 using CTe.Classes;
 using CTe.Classes.Servicos.Consulta;
 using CTe.Servicos.Factory;
-using CTe.Utils.Extencoes;
+using CTe.Utils.Extensoes;
 
 namespace CTe.Servicos.ConsultaProtocolo
 {
@@ -43,30 +43,60 @@ namespace CTe.Servicos.ConsultaProtocolo
     {
         public retConsSitCTe ConsultaProtocolo(string chave, ConfiguracaoServico configuracaoServico = null)
         {
-            var consSitCTe = ClassesFactory.CriarconsSitCTe(chave, configuracaoServico);
-            consSitCTe.ValidarSchema(configuracaoServico);
-            consSitCTe.SalvarXmlEmDisco(configuracaoServico);
+            var configServico = configuracaoServico ?? ConfiguracaoServico.Instancia;
 
-            var webService = WsdlFactory.CriaWsdlConsultaProtocolo(configuracaoServico);
+            var consSitCTe = ClassesFactory.CriarconsSitCTe(chave, configServico);
+
+            if (configServico.IsValidaSchemas)
+                consSitCTe.ValidarSchema(configServico);
+
+            consSitCTe.SalvarXmlEmDisco(configServico);
+
+            var webService = WsdlFactory.CriaWsdlConsultaProtocolo(configServico);
             var retornoXml = webService.cteConsultaCT(consSitCTe.CriaRequestWs());
 
             var retorno = retConsSitCTe.LoadXml(retornoXml.OuterXml, consSitCTe);
-            retorno.SalvarXmlEmDisco(chave, configuracaoServico);
+            retorno.SalvarXmlEmDisco(chave, configServico);
+
+            return retorno;
+        }
+
+        public retConsSitCTe ConsultaProtocoloV4(string chave, ConfiguracaoServico configuracaoServico = null)
+        {
+            var configServico = configuracaoServico ?? ConfiguracaoServico.Instancia;
+
+            var consSitCTe = ClassesFactory.CriarconsSitCTe(chave, configServico);
+
+            if (configServico.IsValidaSchemas)
+                consSitCTe.ValidarSchema(configServico);
+
+            consSitCTe.SalvarXmlEmDisco(configServico);
+
+            var webService = WsdlFactory.CriaWsdlConsultaProtocoloV4(configServico);
+            var retornoXml = webService.cteConsultaCT(consSitCTe.CriaRequestWs());
+
+            var retorno = retConsSitCTe.LoadXml(retornoXml.OuterXml, consSitCTe);
+            retorno.SalvarXmlEmDisco(chave, configServico);
 
             return retorno;
         }
 
         public async Task<retConsSitCTe> ConsultaProtocoloAsync(string chave, ConfiguracaoServico configuracaoServico = null)
         {
-            var consSitCTe = ClassesFactory.CriarconsSitCTe(chave, configuracaoServico);
-            consSitCTe.ValidarSchema(configuracaoServico);
-            consSitCTe.SalvarXmlEmDisco(configuracaoServico);
+            var configServico = configuracaoServico ?? ConfiguracaoServico.Instancia;
 
-            var webService = WsdlFactory.CriaWsdlConsultaProtocolo(configuracaoServico);
+            var consSitCTe = ClassesFactory.CriarconsSitCTe(chave, configServico);
+
+            if (configServico.IsValidaSchemas)
+                consSitCTe.ValidarSchema(configServico);
+
+            consSitCTe.SalvarXmlEmDisco(configServico);
+
+            var webService = WsdlFactory.CriaWsdlConsultaProtocolo(configServico);
             var retornoXml = await webService.cteConsultaCTAsync(consSitCTe.CriaRequestWs());
 
             var retorno = retConsSitCTe.LoadXml(retornoXml.OuterXml, consSitCTe);
-            retorno.SalvarXmlEmDisco(chave, configuracaoServico);
+            retorno.SalvarXmlEmDisco(chave, configServico);
 
             return retorno;
         }

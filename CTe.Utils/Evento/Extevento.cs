@@ -37,7 +37,7 @@ using System.Xml;
 using CTe.Classes;
 using CTe.Classes.Servicos.Evento;
 using CTe.Classes.Servicos.Tipos;
-using CTe.Utils.Extencoes;
+using CTe.Utils.Extensoes;
 using CTe.Utils.Validacao;
 using DFe.Utils;
 using DFe.Utils.Assinatura;
@@ -74,20 +74,25 @@ namespace CTe.Utils.Evento
 
         public static void ValidarSchema(this eventoCTe eventoCTe, ConfiguracaoServico configuracaoServico = null)
         {
+            var configServico = configuracaoServico ?? ConfiguracaoServico.Instancia;
+
             var xmlEvento = eventoCTe.ObterXmlString();
 
             switch (eventoCTe.versao)
             {
                 case versao.ve200:
-                    Validador.Valida(xmlEvento, "eventoCTe_v2.00.xsd", configuracaoServico);
+                    Validador.Valida(xmlEvento, "eventoCTe_v2.00.xsd", configServico);
                     break;
                 case versao.ve300:
-                    Validador.Valida(xmlEvento, "eventoCTe_v3.00.xsd", configuracaoServico);
+                    Validador.Valida(xmlEvento, "eventoCTe_v3.00.xsd", configServico);
+                    break;
+                case versao.ve400:
+                    Validador.Valida(xmlEvento, "eventoCTe_v4.00.xsd", configServico);
                     break;
                 default:
                     throw new InvalidOperationException("Nos achamos um erro na hora de validar o schema, " +
                                                    "a versão está inválida, somente é permitido " +
-                                                   "versão 2.00 é 3.00");
+                                                   "versão 2.00, 3.00, 4.00");
             }
 
             ValidarSchemaEventoContainer(eventoCTe.infEvento.detEvento.EventoContainer, eventoCTe.versao, configuracaoServico);
@@ -95,24 +100,29 @@ namespace CTe.Utils.Evento
 
         private static void ValidarSchemaEventoContainer(EventoContainer container, versao versao, ConfiguracaoServico configuracaoServico = null)
         {
+            var configServico = configuracaoServico ?? ConfiguracaoServico.Instancia;
+
             if (container.GetType() == typeof(evCancCTe))
             {
-                var evCancCTe = (evCancCTe) container;
+                var evCancCTe = (evCancCTe)container;
 
                 var xmlEventoCancelamento = evCancCTe.ObterXmlString();
 
                 switch (versao)
                 {
                     case versao.ve200:
-                        Validador.Valida(xmlEventoCancelamento, "evCancCTe_v2.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCancelamento, "evCancCTe_v2.00.xsd", configServico);
                         break;
                     case versao.ve300:
-                        Validador.Valida(xmlEventoCancelamento, "evCancCTe_v3.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCancelamento, "evCancCTe_v3.00.xsd", configServico);
+                        break;
+                    case versao.ve400:
+                        Validador.Valida(xmlEventoCancelamento, "evCancCTe_v4.00.xsd", configServico);
                         break;
                     default:
                         throw new InvalidOperationException("Nos achamos um erro na hora de validar o schema, " +
                                                        "a versão está inválida, somente é permitido " +
-                                                       "versão 2.00 é 3.00");
+                                                       "versão 2.00, 3.00, 4.00");
                 }
 
 
@@ -127,15 +137,18 @@ namespace CTe.Utils.Evento
                 switch (versao)
                 {
                     case versao.ve200:
-                        Validador.Valida(xmlEventoCCe, "evCCeCTe_v2.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCCe, "evCCeCTe_v2.00.xsd", configServico);
                         break;
                     case versao.ve300:
-                        Validador.Valida(xmlEventoCCe, "evCCeCTe_v3.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCCe, "evCCeCTe_v3.00.xsd", configServico);
+                        break;
+                    case versao.ve400:
+                        Validador.Valida(xmlEventoCCe, "evCCeCTe_v4.00.xsd", configServico);
                         break;
                     default:
                         throw new InvalidOperationException("Nos achamos um erro na hora de validar o schema, " +
                                                        "a versão está inválida, somente é permitido " +
-                                                       "versão 2.00 é 3.00");
+                                                       "versão 2.00, 3.00, 4.00");
                 }
             }
 
@@ -148,15 +161,18 @@ namespace CTe.Utils.Evento
                 switch (versao)
                 {
                     case versao.ve200:
-                        Validador.Valida(xmlEventoCCe, "evPrestDesacordo_v2.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCCe, "evPrestDesacordo_v2.00.xsd", configServico);
                         break;
                     case versao.ve300:
-                        Validador.Valida(xmlEventoCCe, "evPrestDesacordo_v3.00.xsd", configuracaoServico);
+                        Validador.Valida(xmlEventoCCe, "evPrestDesacordo_v3.00.xsd", configServico);
+                        break;
+                    case versao.ve400:
+                        Validador.Valida(xmlEventoCCe, "evPrestDesacordo_v4.00.xsd", configServico);
                         break;
                     default:
                         throw new InvalidOperationException("Nos achamos um erro na hora de validar o schema, " +
                                                        "a versão está inválida, somente é permitido " +
-                                                       "versão 2.00 é 3.00");
+                                                       "versão 2.00, 3.00, 4.00");
                 }
             }
         }

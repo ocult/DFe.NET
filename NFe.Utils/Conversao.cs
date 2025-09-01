@@ -31,9 +31,9 @@
 /* Rua Comendador Francisco josé da Cunha, 111 - Itabaiana - SE - 49500-000     */
 /********************************************************************************/
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using DFe.Classes.Flags;
+using DFe.Utils.Assinatura;
 using NFe.Classes.Informacoes.Detalhe.Tributacao.Estadual.Tipos;
 using NFe.Classes.Informacoes.Emitente;
 using NFe.Classes.Informacoes.Identificacao.Tipos;
@@ -145,6 +145,8 @@ namespace NFe.Utils
                     return "Simples Nacional - sublimite excedido";
                 case CRT.RegimeNormal:
                     return "Normal";
+                case CRT.SimplesNacionalMei:
+                    return "Simples Nacional MEI";
                 default:
                     throw new ArgumentOutOfRangeException("crt", crt, null);
             }
@@ -229,10 +231,10 @@ namespace NFe.Utils
         {
             var bytes = Encoding.UTF8.GetBytes(s);
 
-            var sha1 = SHA1.Create();
-            var hashBytes = sha1.ComputeHash(bytes);
+            var hashSha1Bytes = AssinaturaDigital.ObterHashSha1Bytes(bytes);
+            var hexSha1DeString = ObterHexDeByteArray(hashSha1Bytes);
 
-            return ObterHexDeByteArray(hashBytes);
+            return hexSha1DeString;
         }
 
         /// <summary>

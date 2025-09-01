@@ -31,25 +31,27 @@
 /* Rua Comendador Francisco josé da Cunha, 111 - Itabaiana - SE - 49500-000     */
 /********************************************************************************/
 
-using MDFe.Classes.Extencoes;
+using MDFe.Classes.Extensoes;
 using MDFe.Classes.Retorno.MDFeConsultaProtocolo;
 using MDFe.Servicos.Factory;
+using MDFe.Servicos.Interfaces;
+using MDFe.Utils.Configuracoes;
 
 namespace MDFe.Servicos.ConsultaProtocoloMDFe
 {
-    public class ServicoMDFeConsultaProtocolo
+    public class ServicoMDFeConsultaProtocolo : IServicoMDFeConsultaProtocolo
     {
-        public MDFeRetConsSitMDFe MDFeConsultaProtocolo(string chave)
+        public MDFeRetConsSitMDFe MDFeConsultaProtocolo(string chave, MDFeConfiguracao cfgMdfe = null)
         {
-            var consSitMdfe = ClassesFactory.CriarConsSitMDFe(chave);
-            consSitMdfe.ValidarSchema();
-            consSitMdfe.SalvarXmlEmDisco();
+            var consSitMdfe = ClassesFactory.CriarConsSitMDFe(chave, cfgMdfe);
+            consSitMdfe.ValidarSchema(cfgMdfe);
+            consSitMdfe.SalvarXmlEmDisco(cfgMdfe);
 
-            var webService = WsdlFactory.CriaWsdlMDFeConsulta();
+            var webService = WsdlFactory.CriaWsdlMDFeConsulta(cfgMdfe);
             var retornoXml = webService.mdfeConsultaMDF(consSitMdfe.CriaRequestWs());
 
             var retorno = MDFeRetConsSitMDFe.LoadXml(retornoXml.OuterXml, consSitMdfe);
-            retorno.SalvarXmlEmDisco(chave);
+            retorno.SalvarXmlEmDisco(chave, cfgMdfe);
 
             return retorno;
         }
